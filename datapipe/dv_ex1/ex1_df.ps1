@@ -30,6 +30,7 @@ $IDSFileOriginal = $workFolder + "BlobTableOriginal.json"
 $IDSFile = $TempFolder + "BlobTable.json"
 $ODSFileOriginal = $workFolder + "SQLTableOriginal.json"
 $ODSFile = $TempFolder + "SQLTable.json"
+$ADPFile = $workFolder + "ADP.json"
 
 ## Log start time of script
 $LogFilePrefix = "Time" + (Get-Date -Format "HHmmss") ; $LogFileSuffix = ".txt" ; $StartTime = Get-Date 
@@ -142,15 +143,32 @@ Write-Host "Create Data Factory"
 New-AzureRmDataFactory -ResourceGroupName $ResourceGroupName -Name $DataFactoryName –Location $Location
 
 Write-Host "Create Azure Storage & HDInsight Linked Services"
+# $SLSFile contains the Blob Storage instance details and credentials (but not, for example, the foldername)
 New-AzureRmDataFactoryLinkedService -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -File $SLSFile
+# $SQLFile contains the details of the SQL Server instance (eg. Server address/DB) and credentials (but not the table name/DDL)
 New-AzureRmDataFactoryLinkedService -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -File $SQLFile
 
-Write-Host "Create DataSets"
-$DF = Get-AzureRmDataFactory -ResourceGroupName $ResourceGroupName -Name $DataFactoryName
+Write-Host "Create DataSets in Data Factory"
+# Passes the Data Factory group details to the two lines below
+$DF = Get-AzureRmDataFactory -ResourceGroupName $ResourceGroupName -Name $DataFactoryName 
+# $IDSFile - Inbound DataSource File. Because we're loading from Blob to SQL Server, this contains the Blob file specs
 New-AzureRmDataFactoryDataset $DF -File $IDSFile
+# $ODSFile - Outbound DataSource File. Contains the SQL Server table details, including DDL.
 New-AzureRmDataFactoryDataset $DF -File $ODSFile
 
+Write-Host "Create Data Pipelines in Data Factory"
+# The $ADPFile holds the ETL instructions for the Data Factory job.
+New-AzureRmDataFactoryPipeline -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -File $ADPFile -Force   
+Start-Sleep 180   # sleeps this script for 3 minutes. Gives the job 3 minutes to run, otherwise it's long-lived.
+Suspend-AzureRMDataFactoryPipeline -ResourceGroupName $ResourceGroupName -DatafactoryName $DataFActoryName -Name "ADFPipeline"
 
 # Close and kill everything
 Write-Host "Delete everything in the Resource group we just created"
 Remove-AzureRmResourceGroup -Name $ResourceGroupName
+Write-Host "Time and close the script"
+$EndTime = Get-Date ; $et = "Time" + $EndTime.ToString("yyyyMMddHHmm")
+"End Time:   " + $EndTime >> $TempFolder$LogFilePrefix$LogFileSuffix
+"Duration:   " + ($EndTime - $StartTime).TotalMinutes + " (Minutes)" >> $TempFolder$LogFilePrefix$LogFileSuffix 
+Rename-Item -Path $TempFolder$LogFilePrefix$LogFileSuffix -NewName $et$LogFileSuffix
+
+Write-Host "Script complete!"
