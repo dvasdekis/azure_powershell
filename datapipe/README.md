@@ -14,5 +14,6 @@ A data pipeline script is made up of a few sections:
 		- SQL DB Linked services
 		- HDInsight services, and so on
 	- To manage the private keys (effectively passwords) that get produced when you create a service, the script replaces a parameter in these template files with the real key when it runs, and writes the version with the real key to a temporary folder
+ 4. Initialise and perform the ETL
 
 Lastly, these Data Pipelines are a top-down process to write (infrastructure first, then what you'll do with it), so plan your component needs from the beginning, and don't worry about the specifics until the end.
