@@ -1,2 +1,0 @@
-CREATE USER sqllogin3 FOR LOGIN sqllogin3 WITH DEFAULT_SCHEMA = dbo
-EXEC sp_addrolemember db_owner, sqllogin3

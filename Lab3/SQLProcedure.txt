@@ -1,8 +1,0 @@
-CREATE PROCEDURE lsp_emp2
-AS
-BEGIN
-   SELECT ID, Upper(LastName) AS LastName, Lower(FirstName) AS FirstName, HireDate, HireTime
-   INTO dbo.emp2
-   FROM dbo.emp
-END
-
