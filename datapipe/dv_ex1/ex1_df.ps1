@@ -1,24 +1,6 @@
-﻿# Script descrition and general structure
-
-# A data pipeline script is made up of a few sections:
-# 1. Set the common variables (lots of boilerplate)
-# 2. Define a bunch of config files that use these variables
-# 3. Tell Azure to Initialise all the infrastructure you'll need, including:
-#	- 
-#	- You could potentially do this in parallel
-# 4. Grab the details of the infrastructure, and pass the details to Data Factory. Details include:
-#	- Storage linked service file, containing:
-#		-  
-#	- Usernames and passwords
- 
-
-
-
-
-
-### Configure Objects & Variables
+﻿
+# Configure Objects & Variables - The below section is almost generic boilerplate
 Set-StrictMode -Version 2.0
-#### use this so debug output shows
 $SubscriptionName = "Azure Pass"
 $workFolder = "C:\Labfiles\dv_ex1\" ; $TempFolder = "C:\Labfiles\temp\" 
 $ExternalIP = ((Invoke-WebRequest http://icanhazip.com -UseBasicParsing).Content).Trim()          # "nslookup myip.opendns.com resolver1.opendns.com" or http://whatismyip.com will also get your Public IP
@@ -27,11 +9,11 @@ $Location = "EASTUS"
 $namePrefix = ("DV" + (Get-Date -Format "HHmmss")).ToLower()  
 $ResourceGroupName = $namePrefix + "rg" # arbritrary
 $ContainerName = "adf" # arbritrary
-$azcopyPath = "C:\AzCopy"
+$azcopyPath = "C:\AzCopy" # Path to installed version of AzCopy
 $DataFactoryName = $namePrefix + "df" # arbritrary
 $ODSName = "SQLTable" # arbritrary
 
-#####SQL Server variables
+## SQL Server-specific variables
 $SQLServerName = $namePrefix + "sql1"
 $SQLDatabase = "db1"
 $SQLServerLogin = "sqllogin1"                              # Login created for SQL Server Administration
@@ -39,7 +21,7 @@ $SQLServerLogin3 = "sqllogin3"                             # Login created for D
 $Password = "Password123"
 $SQLDatabaseTable = "Emp"
 
-# Here lies all the config files
+## Here lies all the config file template paths
 $SLSFileOriginal = $workFolder + "StorageLinkedServiceOriginal.json"
 $SLSFile = $TempFolder + "StorageLinkedService.json"
 $SQLFileOriginal = $workFolder + "AzureSQLLinkedServiceOriginal.json"
@@ -49,16 +31,15 @@ $IDSFile = $TempFolder + "BlobTable.json"
 $ODSFileOriginal = $workFolder + "SQLTableOriginal.json"
 $ODSFile = $TempFolder + "SQLTable.json"
 
-# Prework
-### Log start time of script
+## Log start time of script
 $LogFilePrefix = "Time" + (Get-Date -Format "HHmmss") ; $LogFileSuffix = ".txt" ; $StartTime = Get-Date 
 "Create Data Factory" > $TempFolder$LogFilePrefix$LogFileSuffix
 "Start Time: " + $StartTime >> $TempFolder$LogFilePrefix$LogFileSuffix
 
-Write-Host "Delete and recreate the temp folder"
+Write-Host "Delete and recreate the temp folder" # Write-Host is the Powershell version of Echo
 Remove-Item $TempFolder -Recurse
 New-Item -Path $TempFolder -ItemType directory
-
+# End Variable Configs
 
 Write-Host "Login to Azure"
 Login-AzureRmAccount
@@ -168,7 +149,6 @@ Write-Host "Create DataSets"
 $DF = Get-AzureRmDataFactory -ResourceGroupName $ResourceGroupName -Name $DataFactoryName
 New-AzureRmDataFactoryDataset $DF -File $IDSFile
 New-AzureRmDataFactoryDataset $DF -File $ODSFile
-
 
 
 # Close and kill everything
