@@ -1,0 +1,29 @@
+        {    
+            "name":"MyBlobSource",  
+            "properties":{    
+               "type":"reference",  
+               "serialization":{    
+                  "type":"CSV",  
+                  "properties":{    
+                     "fieldDelimiter":",",  
+                     "encoding":"UTF8" 
+                  }  
+               },  
+               "datasource":{    
+                  "type":"Microsoft.Storage/Blob",  
+                  "properties":{    
+                     "storageAccounts":[    
+                        {    
+                           "accountName":"samplestorage",  
+                           "accountKey":"samplekey"  
+                        }  
+                     ],  
+                     "container":"samplecontainer",
+                     "DateFormat": "yyyy/MM/dd",
+                     "TimeFormat": "HH", 
+                     "pathPattern": "BlobOutput",
+                     "blobName":""  
+                  }  
+               }  
+            }  
+         }

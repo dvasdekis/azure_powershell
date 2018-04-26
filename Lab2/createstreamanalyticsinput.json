@@ -1,0 +1,23 @@
+
+{    
+   "properties":{    
+      "type":"stream",  
+      "serialization":{    
+         "type":"JSON",  
+         "properties":{    
+            "fieldDelimiter":",",  
+            "encoding":"UTF8"  
+         }  
+      },  
+      "datasource":{    
+         "type":"Microsoft.ServiceBus/EventHub",  
+         "properties":{    
+            "serviceBusNamespace":"in180154ns",  
+            "sharedAccessPolicyName":"in180154ehRule1",  
+            "sharedAccessPolicyKey":"IO7jPBQpT1ei/UY9f9ChVRKSdPjIipPulotQ/jP4Fw4=",  
+            "eventHubName":"in180154eh",
+            "consumerGroupName":"in180154cg"  
+         }  
+      }  
+   }  
+}

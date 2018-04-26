@@ -1,0 +1,27 @@
+{
+    "name": "ADLOutput",
+    "properties": {
+	"Structure": 
+	[
+	{"Name": "LastName", "Type": "String"},
+	{"Name": "FirstName", "Type": "String"},
+	{"Name": "HireDate", "Type": "DateTime"},
+	{"Name": "HireTime", "Type": "DateTime"}
+	],
+        "published": false,
+        "type": "AzureDataLakeStore",
+        "linkedServiceName": "ADLLinkedService",
+        "typeProperties": {
+            "FileName": "output.csv",
+            "FolderPath": "<folderpath>",
+            "Format": {
+                "Type": "TextFormat",
+                "ColumnDelimiter": ","
+            }
+        },
+        "availability": {
+            "frequency": "Minute",
+            "interval": 15
+        }
+    }
+}

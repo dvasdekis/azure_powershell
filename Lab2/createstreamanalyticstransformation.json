@@ -1,0 +1,8 @@
+{    
+   "properties":{    
+      "streamingUnits":1,  
+      "query":"Select Date, Value, Anomaly From in180154input"  
+   }  
+}
+
+

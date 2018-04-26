@@ -1,0 +1,8 @@
+{    
+   "properties":{    
+      "streamingUnits":1,  
+      "query":"select * from samplequery"  
+   }  
+}
+
+

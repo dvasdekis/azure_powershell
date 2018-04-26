@@ -1,0 +1,29 @@
+REM ***   Create Variables and Configure Environment   (Command Prompt)   *** 
+REM PowerShell Install BASH:  "Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux"
+REM bash
+REM sudo apt-get install npm
+REM npm install --global azure-cli
+set WorkFolder=C:\LabTemp\
+set azcopyPath=C:\Program Files (x86)\Microsoft SDKs\Azure\AzCopy
+set H=%Time:~0,2%
+set M=%Time:~3,2%
+set S=%Time:~6,2%
+set TimeNow=%H%%M%%S%
+set namePrefix=in55224a%TimeNow%
+set resourceGroupName=%NamePrefix%rg
+set StorageAccountName=%NamePrefix%sa
+set BlobContainerName=55224a
+set Location=EASTUS
+
+REM Login to Azure
+az login
+
+REM Create Resource Group
+ae group create --name %ResourceGroupName% --location %Location%
+
+REM Create Storage Account
+az storage account create -n %StorageAccountName% -l %Location% -g %ResourceGroupName% --sku standard_lrs
+
+
+
+

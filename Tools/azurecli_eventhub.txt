@@ -1,0 +1,4 @@
+azure config mode arm
+
+
+azure group deployment create $ResourceGroupName --template createeventhub.json

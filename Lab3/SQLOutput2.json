@@ -1,0 +1,15 @@
+{
+    "name": "SQLOutput2",
+    "properties": {
+        "published": false,
+        "type": "AzureSqlTable",
+        "linkedServiceName": "SQLLinkedService",
+        "typeProperties": {
+            "tableName": "emp2"
+        },
+        "availability": {
+            "frequency": "Minute",
+            "interval": 15
+        }
+    }
+}

@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS [dbo].[OhioWeather]
+CREATE TABLE [dbo].[OhioWeather] 
+	([DATE] [nvarchar](MAX) NULL, 
+	[VALUE] [nvarchar](MAX) NULL, 
+	[ANOMALY] [nvarchar](MAX) NULL )
+CREATE USER sqllogin3 FOR LOGIN sqllogin3 WITH DEFAULT_SCHEMA = dbo
+EXEC sp_addrolemember N'db_owner', N'sqllogin3'
+
+

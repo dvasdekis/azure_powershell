@@ -1,0 +1,20 @@
+{
+"name": "SQLOutput",
+"properties": {
+"structure": [
+{"name": "LastName","type": "String"},
+{"name": "FirstName","type": "String"},
+{"name": "HireDate","type": "DateTime"},
+{"name": "HireTime","type": "DateTime"}
+],
+"type": "AzureSqlTable",
+"linkedServiceName": "SQLLinkedService",
+"typeProperties": {
+"tableName": "emp"
+},
+"availability": {
+"frequency": "Minute",
+"interval": 15
+}
+}
+}

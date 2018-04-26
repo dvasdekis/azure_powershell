@@ -1,0 +1,27 @@
+{
+"Name": "BlobTable",
+"Properties": {
+"Structure": 
+[
+{"Name": "LastName", "Type": "String"},
+{"Name": "FirstName", "Type": "String"},
+{"Name": "HireDate", "Type": "DateTime"},
+{"Name": "HireTime", "Type": "DateTime"}
+],
+"Type": "AzureBlob",
+"LinkedServiceName": "StorageLinkedService",
+"TypeProperties": {
+"FileName": "input.csv",
+"FolderPath": "<folderpath>",
+"Format": {
+"Type": "TextFormat",
+"ColumnDelimiter": ","
+}
+},
+"External": true,
+"Availability": {
+"Frequency": "Minute",
+"Interval": 15
+}
+}
+}

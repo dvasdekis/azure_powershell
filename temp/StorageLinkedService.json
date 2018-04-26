@@ -1,0 +1,10 @@
+{
+     "name": "StorageLinkedService",
+     "properties": {
+         "type": "AzureStorage",
+         "description": "SLS",
+         "typeProperties": {
+             "connectionString": "DefaultEndpointsProtocol=https;AccountName=dv55224a20sa;AccountKey=LDJZwH3BFvuvQPSvpImJ6bnbOQsQIEojTFaJuBBDfy7/+Bjr3pR8NjhpiFC9K9o3cU/m1ll16BnWTY6ZvSdiSw=="
+         }
+     }
+ }

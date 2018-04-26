@@ -1,0 +1,4 @@
+CREATE LOGIN sqllogin3 WITH PASSWORD = 'Password123'
+
+
+

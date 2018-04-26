@@ -1,0 +1,15 @@
+{    
+   "properties":{    
+      "datasource":{    
+         "type":"Microsoft.Sql/Server/Database",  
+         "properties":{    
+            "server":"sampleserver",  
+            "database":"sampledatabase",  
+            "table":"sampletable",  
+            "user":"sampleuser@sqlserver",  
+            "password":"samplepassword"  
+         }  
+      }  
+   }  
+}
+

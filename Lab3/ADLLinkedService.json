@@ -1,0 +1,21 @@
+{
+   
+   "name": "ADLLinkedService",
+   
+   "properties": {   
+        
+      "type": "AzureDataLakeStore",   
+        
+      "typeProperties": {
+               
+         "dataLakeStoreUri": "adl://in185627dl.azuredatalakestore.net/",   
+            
+         "servicePrincipalId": "a178e2f3-e38e-4d29-ad15-1be430e11fd5",
+         "servicePrincipalKey": "9a9c4a47-c41d-4d83-8380-d35354222ce9",
+         "tenant": "a53c9021-be87-4249-82f6-742e249a5187",
+         "subscriptionId": "d398a2a1-9f19-4787-960b-45558268683d",
+         "resourceGroupName": "in185627rg"
+      }
+   }     
+
+}   

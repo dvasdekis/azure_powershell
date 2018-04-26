@@ -1,0 +1,176 @@
+﻿# Script descrition and general structure
+
+# A data pipeline script is made up of a few sections:
+# 1. Set the common variables (lots of boilerplate)
+# 2. Define a bunch of config files that use these variables
+# 3. Tell Azure to Initialise all the infrastructure you'll need, including:
+#	- 
+#	- You could potentially do this in parallel
+# 4. Grab the details of the infrastructure, and pass the details to Data Factory. Details include:
+#	- Storage linked service file, containing:
+#		-  
+#	- Usernames and passwords
+ 
+
+
+
+
+
+### Configure Objects & Variables
+Set-StrictMode -Version 2.0
+#### use this so debug output shows
+$SubscriptionName = "Azure Pass"
+$workFolder = "C:\Labfiles\dv_ex1\" ; $TempFolder = "C:\Labfiles\temp\" 
+$ExternalIP = ((Invoke-WebRequest http://icanhazip.com -UseBasicParsing).Content).Trim()          # "nslookup myip.opendns.com resolver1.opendns.com" or http://whatismyip.com will also get your Public IP
+$ExternalIPNew = [Regex]::Replace($ExternalIP, '\d{1,3}$', {[Int]$args[0].Value + 1})
+$Location = "EASTUS"
+$namePrefix = ("DV" + (Get-Date -Format "HHmmss")).ToLower()  
+$ResourceGroupName = $namePrefix + "rg" # arbritrary
+$ContainerName = "adf" # arbritrary
+$azcopyPath = "C:\AzCopy"
+$DataFactoryName = $namePrefix + "df" # arbritrary
+$ODSName = "SQLTable" # arbritrary
+
+#####SQL Server variables
+$SQLServerName = $namePrefix + "sql1"
+$SQLDatabase = "db1"
+$SQLServerLogin = "sqllogin1"                              # Login created for SQL Server Administration
+$SQLServerLogin3 = "sqllogin3"                             # Login created for Database Administration
+$Password = "Password123"
+$SQLDatabaseTable = "Emp"
+
+# Here lies all the config files
+$SLSFileOriginal = $workFolder + "StorageLinkedServiceOriginal.json"
+$SLSFile = $TempFolder + "StorageLinkedService.json"
+$SQLFileOriginal = $workFolder + "AzureSQLLinkedServiceOriginal.json"
+$SQLFile = $TempFolder + "AzureSQLLinkedService.json"
+$IDSFileOriginal = $workFolder + "BlobTableOriginal.json"
+$IDSFile = $TempFolder + "BlobTable.json"
+$ODSFileOriginal = $workFolder + "SQLTableOriginal.json"
+$ODSFile = $TempFolder + "SQLTable.json"
+
+# Prework
+### Log start time of script
+$LogFilePrefix = "Time" + (Get-Date -Format "HHmmss") ; $LogFileSuffix = ".txt" ; $StartTime = Get-Date 
+"Create Data Factory" > $TempFolder$LogFilePrefix$LogFileSuffix
+"Start Time: " + $StartTime >> $TempFolder$LogFilePrefix$LogFileSuffix
+
+Write-Host "Delete and recreate the temp folder"
+Remove-Item $TempFolder -Recurse
+New-Item -Path $TempFolder -ItemType directory
+
+
+Write-Host "Login to Azure"
+Login-AzureRmAccount
+$Subscription = Get-AzureRmSubscription -SubscriptionName $SubscriptionName | Select-AzureRmSubscription
+
+Write-Host "Create a resource group"
+New-AzureRmResourceGroup -Name $ResourceGroupName  -Location $Location
+
+Write-Host "Create a Storage Account"
+New-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName -Location $Location -Type Standard_LRS
+$StorageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName)[0].Value
+Write-Host "Copy Input File to Storage Blob"
+$azcopycmd = "cmd.exe /C '$azcopyPath\AzCopy.exe' /S /Y /Source:'$WorkFolder' /Dest:'https://$StorageAccountName.blob.core.windows.net/adfgetstarted' /DestKey:$StorageAccountKey"
+Invoke-Expression -Command:$azcopycmd
+
+# Set config files!
+### Set all the config files that deal with storage
+Write-Host "Update the config/linked storage files"
+Write-Host "Note - a linked storage file is like a connection string for Data Factory"
+#### Storage Linked Service File
+Copy-Item $SLSFileOriginal $SLSFile -Force
+(Get-Content $SLSFile) -Replace '<accountname>', $StorageAccountName | Set-Content $SLSFile
+(Get-Content $SLSFile) -Replace '<accountkey>', $StorageAccountKey | Set-Content $SLSFile
+#### Input Dataset File
+Copy-Item $IDSFileOriginal $IDSFile -Force
+(Get-Content $IDSFile) -Replace '<folderpath>', "$ContainerName/input/" | Set-Content $IDSFile
+#### Output Dataset File
+Copy-Item $ODSFileOriginal $ODSFile -Force
+(Get-Content $ODSFile) -Replace '<OutputDatasetName>', $ODSName | Set-Content $ODSFile
+
+
+
+Write-Host "Use an Azure SQL table as your input database"
+### Define SQL Server Parameters
+$SQLDatabaseConnectionString = "jdbc:sqlserver://$SQLServerName.database.windows.net;user=$SQLServerLogin3@$SQLServerName;password=$Password;database=$SQLDatabase"
+$PWSQL = ConvertTo-SecureString -String $Password -AsPlainText -Force
+
+### Create the server
+Write-Host "Creating SQL Server"
+$SQLCredential = New-Object System.Management.Automation.PSCredential($SQLServerLogin,$PWSQL)
+New-AzureRMSQLServer -ResourceGroupName $ResourceGroupName -Location $Location -Servername $SQLServerName -SQLAdministratorCredentials $SQLCredential -ServerVersion "12.0"
+New-AzureRmSqlServerFirewallRule -ResourceGroupName $ResourceGroupName -ServerName $SQLServerName -FirewallRuleName "ClientIP1" -StartIpAddress $ExternalIP -EndIPAddress $ExternalIP        
+New-AzureRmSqlServerFirewallRule -ResourceGroupName $ResourceGroupName -ServerName $SQLServerName -AllowAllAzureIPs
+New-AzureRmSQLDatabase -ResourceGroupName $ResourceGroupName -Servername $SQLServerName -DatabaseName $SQLDatabase
+Write-Host "SQL Server Created"
+Write-Host "Conencting to SQL Server"
+$ConnectionString = "Server=tcp:$SQLServerName.database.windows.net;Database=master;User ID=$SQLServerLogin@$SQLServerName;Password=$Password;Trusted_Connection=False;Encrypt=True;"
+$SAConnection = New-Object System.Data.SqlClient.SqlConnection($ConnectionString)
+$SAConnection.Open()
+### We have connected to the server that we've created at this point
+### Now, let's create our user
+Write-Host "Creating login $SQLServerLogin3 on SQL server"
+$LoginScript1 = "CREATE LOGIN $SQLServerLogin3 WITH PASSWORD = '$Password'"
+$CreateLogin = New-Object System.Data.SqlClient.SqlCommand($LoginScript1,$SAConnection)
+$CreateLogin.ExecuteNonQuery()
+$SAConnection.Close()
+
+Write-Host "We now login as $SQLServerLogin3 and give login $SQLServerLogin3 a username and roles on the SQL server"
+$LoginScript2 = "CREATE USER sqllogin3 FOR LOGIN sqllogin3 WITH DEFAULT_SCHEMA = dbo"
+$LoginScript3 = "EXEC sp_addrolemember db_owner, sqllogin3"
+$ConnectionString = "Server=tcp:$SQLServerName.database.windows.net;Database=$SQLDatabase;User ID=$SQLServerLogin@$SQLServerName;Password=$Password;Trusted_Connection=False;Encrypt=True;"
+$SAConnection = New-Object System.Data.SqlClient.SqlConnection($ConnectionString)
+$SAConnection.Open()
+$LoginScript2onserver = New-Object System.Data.SqlClient.SqlCommand($LoginScript2,$SAConnection)
+$LoginScript2onserver.ExecuteNonQuery()
+$LoginScript3onserver = New-Object System.Data.SqlClient.SqlCommand($LoginScript3,$SAConnection)
+$LoginScript3onserver.ExecuteNonQuery()
+$SAConnection.Close()
+Write-Host "Succesfully created roles for $SQLServerLogin3"
+
+Write-Host "Create table in database"
+$CTScript1 = @"
+CREATE TABLE dbo.emp
+(
+ID INT IDENTITY(1,1) PRIMARY KEY,
+LastName NVARCHAR(50),
+FirstName NVARCHAR(50),
+HireDate Date,
+HireTime Time
+)
+"@
+$SAConnection2 = New-Object System.Data.SqlClient.SqlConnection($ConnectionString)
+$SAConnection2.Open()
+$CTScript1onserver = New-Object System.Data.SqlClient.SqlCommand($CTScript1,$SAConnection2)
+$CTScript1onserver.ExecuteNonQuery()
+$SAConnection2.Close()
+Write-Host "We now have a table inside our Database"
+#### Define the Azure SQL Linked Service File based on the above
+Copy-Item $SQLFileOriginal $SQLFile -Force
+(Get-Content $SQLFile) -Replace '<server>', $SQLServerName | Set-Content $SQLFile
+(Get-Content $SQLFile) -Replace '<databasename>', $SQLDatabase | Set-Content $SQLFile
+(Get-Content $SQLFile) -Replace '<user>', $SQLServerLogin3 | Set-Content $SQLFile
+(Get-Content $SQLFile) -Replace '<password>', $Password | Set-Content $SQLFile
+
+
+
+# Load the data into blob, and then into our table
+
+Write-Host "Create Data Factory"
+New-AzureRmDataFactory -ResourceGroupName $ResourceGroupName -Name $DataFactoryName –Location $Location
+
+Write-Host "Create Azure Storage & HDInsight Linked Services"
+New-AzureRmDataFactoryLinkedService -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -File $SLSFile
+New-AzureRmDataFactoryLinkedService -ResourceGroupName $ResourceGroupName -DataFactoryName $DataFactoryName -File $SQLFile
+
+Write-Host "Create DataSets"
+$DF = Get-AzureRmDataFactory -ResourceGroupName $ResourceGroupName -Name $DataFactoryName
+New-AzureRmDataFactoryDataset $DF -File $IDSFile
+New-AzureRmDataFactoryDataset $DF -File $ODSFile
+
+
+
+# Close and kill everything
+Write-Host "Delete everything in the Resource group we just created"
+Remove-AzureRmResourceGroup -Name $ResourceGroupName

@@ -1,0 +1,10 @@
+{
+     "name": "BlobLinkedService",
+     "properties": {
+         "type": "AzureStorage",
+         "description": "BlobLinkedService",
+         "typeProperties": {
+             "connectionString": "DefaultEndpointsProtocol=https;AccountName=in220307sa;AccountKey=klHVm5OrhG4aFIBgPNpjQPaZd1Snv9506NCixXxs+alr0QrPREo8WJru+/n4cjOS3BdKhHNDqzLOlFEuOsG/kQ=="
+         }
+     }
+ }
