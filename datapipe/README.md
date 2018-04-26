@@ -10,11 +10,11 @@ A data pipeline script is made up of a few sections:
 	- A Data Factory (this is more of a gathering place for jobs)
 	- Note: You could potentially do the above in parallel
  4. Grab the details of the infrastructure, and pass the details to Data Factory. Details include:
-	- Linked services files, for example:
-		- Storage Linked Services, telling Data Factory where your Blob stoage is
+	- Linked services templates, specifying, for example:
+		- Storage Linked Services, telling Data Factory where your Blob storage is
 		- SQL DB Linked services
 		- HDInsight services, and so on
-		
-	- Usernames and passwords
+	- To manage the private keys (effectively passwords) that get produced when you create a service, the script replaces a parameter in these template files with the real key when it runs, and writes the version with the real key to a temporary folder
+	
 
 
