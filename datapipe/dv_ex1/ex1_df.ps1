@@ -2,7 +2,8 @@
 # Configure Objects & Variables - The below section is almost generic boilerplate
 Set-StrictMode -Version 2.0
 $SubscriptionName = "Azure Pass"
-$workFolder = "C:\Labfiles\dv_ex1\" ; $TempFolder = "C:\Labfiles\temp\" 
+$scriptPath = split-path -parent $MyInvocation.MyCommand.Definition #magic line to get the dir of the script as a variable
+$workFolder = "$scriptPath\" ; $TempFolder = "C:\temp\" 
 $ExternalIP = ((Invoke-WebRequest http://icanhazip.com -UseBasicParsing).Content).Trim()          # "nslookup myip.opendns.com resolver1.opendns.com" or http://whatismyip.com will also get your Public IP
 $ExternalIPNew = [Regex]::Replace($ExternalIP, '\d{1,3}$', {[Int]$args[0].Value + 1})
 $Location = "EASTUS"
@@ -12,6 +13,7 @@ $ContainerName = "adf" # arbritrary
 $azcopyPath = "C:\AzCopy" # Path to installed version of AzCopy
 $DataFactoryName = $namePrefix + "df" # arbritrary
 $ODSName = "SQLTable" # arbritrary
+$StorageAccountName = $namePrefix + "sa" # arbritrary
 
 ## SQL Server-specific variables
 $SQLServerName = $namePrefix + "sql1"
@@ -53,7 +55,7 @@ Write-Host "Create a Storage Account"
 New-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $StorageAccountName -Location $Location -Type Standard_LRS
 $StorageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $ResourceGroupName -Name $StorageAccountName)[0].Value
 Write-Host "Copy Input File to Storage Blob"
-$azcopycmd = "cmd.exe /C '$azcopyPath\AzCopy.exe' /S /Y /Source:'$WorkFolder' /Dest:'https://$StorageAccountName.blob.core.windows.net/adfgetstarted' /DestKey:$StorageAccountKey"
+$azcopycmd = "cmd.exe /C '$azcopyPath\AzCopy.exe' /S /Y /Source:'$WorkFolder' /Dest:'https://$StorageAccountName.blob.core.windows.net/adf' /DestKey:$StorageAccountKey"
 Invoke-Expression -Command:$azcopycmd
 
 # Set config files!
@@ -165,7 +167,6 @@ Suspend-AzureRMDataFactoryPipeline -ResourceGroupName $ResourceGroupName -Datafa
 # Close and kill everything
 Write-Host "Delete everything in the Resource group we just created"
 Remove-AzureRmResourceGroup -Name $ResourceGroupName
-Write-Host "Time and close the script"
 $EndTime = Get-Date ; $et = "Time" + $EndTime.ToString("yyyyMMddHHmm")
 "End Time:   " + $EndTime >> $TempFolder$LogFilePrefix$LogFileSuffix
 "Duration:   " + ($EndTime - $StartTime).TotalMinutes + " (Minutes)" >> $TempFolder$LogFilePrefix$LogFileSuffix 
