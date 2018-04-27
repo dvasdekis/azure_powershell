@@ -170,7 +170,6 @@ Copy-Item $SQLFileOriginal $SQLFile -Force
 (Get-Content $SQLFile) -Replace '<databasename>', $SQLDatabase | Set-Content $SQLFile
 (Get-Content $SQLFile) -Replace '<user>', $SQLServerLogin3 | Set-Content $SQLFile
 (Get-Content $SQLFile) -Replace '<password>', $Password | Set-Content $SQLFile
-
 #########################
 
 
@@ -181,6 +180,9 @@ Copy-Item $DFDSBlobOriginal $DFDSBlob -Force
 #### SQL table file
 Copy-Item $DFDSSQLTableOriginal $DFDSSQLTable -Force
 (Get-Content $DFDSSQLTable) -Replace '<OutputDatasetName>', $SQLTableName | Set-Content $DFDSSQLTable
+#### ADL Output File
+Copy-Item $ADLOutputOriginal $ADLOutput -Force
+(Get-Content $ADLOutput) -Replace '<folderpath>', "$ContainerName/output/" | Set-Content $ADLOutput
 ####################################################################################################################################
 
 
