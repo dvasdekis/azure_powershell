@@ -48,6 +48,8 @@ $DFDSBlobOriginal = $workFolder + "BlobTableOriginal.json"
 $DFDSBlob = $TempFolder + "BlobTable.json"
 $DFDSSQLTableOriginal = $workFolder + "SQLTableOriginal.json"
 $DFDSSQLTable = $TempFolder + "SQLTable.json"
+$ADLOutputOriginal = $workFolder + "ADLOutputOriginal.json"
+$ADLOutput = $TempFolder + "ADLOutput.json"
 #####################
 ### Data Factory Workflows
 $ADPFile = $workFolder + "ADP.json"
@@ -159,7 +161,7 @@ Copy-Item $ADLLinkedServiceOriginal $ADLLinkedService -Force
 (Get-Content $ADLLinkedService) -Replace '<accountname>', $DataLakeName | Set-Content $ADLLinkedService
 (Get-Content $ADLLinkedService) -Replace '<resourcegroupname>', $ResourceGroupName | Set-Content $ADLLinkedService
 (Get-Content $ADLLinkedService) -Replace '<serviceprincipalid>', $App.ApplicationID.GUID | Set-Content $ADLLinkedService
-(Get-Content $ADLLinkedService) -Replace '<serviceprincipalkey>', $Key | Set-Content $ADLLinkedService
+(Get-Content $ADLLinkedService) -Replace '<serviceprincipalkey>', $GUID.GUID | Set-Content $ADLLinkedService
 (Get-Content $ADLLinkedService) -Replace '<subscriptionid>', $Subscription.Subscription.SubscriptionID | Set-Content $ADLLinkedService
 (Get-Content $ADLLinkedService) -Replace '<tenantid>', $Subscription.Tenant.TenantID | Set-Content $ADLLinkedService
 #### Azure SQL Linked Service File
