@@ -1,4 +1,4 @@
-# Data Pipeline
+# Data Factory powershell scripts
  
 A data pipeline script is made up of a few sections:
  1. Set the common variables (lots of boilerplate)

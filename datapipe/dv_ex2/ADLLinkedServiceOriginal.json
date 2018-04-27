@@ -1,0 +1,21 @@
+{
+   
+   "name": "ADLLinkedService",
+   
+   "properties": {   
+        
+      "type": "AzureDataLakeStore",   
+        
+      "typeProperties": {
+               
+         "dataLakeStoreUri": "adl://<accountname>.azuredatalakestore.net/",   
+            
+         "servicePrincipalId": "<serviceprincipalid>",
+         "servicePrincipalKey": "<serviceprincipalkey>",
+         "tenant": "<tenantid>",
+         "subscriptionId": "<subscriptionid>",
+         "resourceGroupName": "<resourcegroupname>"
+      }
+   }     
+
+}   
