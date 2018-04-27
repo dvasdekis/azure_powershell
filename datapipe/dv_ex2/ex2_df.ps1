@@ -234,7 +234,7 @@ $DF = Get-AzureRmDataFactory -ResourceGroupName $ResourceGroupName -Name $DataFa
 # $DFDSBlob - Inbound Dataset File. Because we're loading from Blob to SQL Server, this contains the Blob file specs
 New-AzureRmDataFactoryDataset $DF -File $DFDSBlob
 # We need an ADL Dataset File
-New-AzureRmDataFactoryDataset $DF -File $ADLLinkedService
+New-AzureRmDataFactoryDataset $DF -File $ADLOutput
 # $DFDSSQLTable - Outbound Dataset File. Contains the SQL Server table details, including DDL.
 New-AzureRmDataFactoryDataset $DF -File $DFDSSQLTable
 
